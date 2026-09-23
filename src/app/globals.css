@@ -1,0 +1,188 @@
+@import "tailwindcss";
+
+/* ── Palette: strawberry milk, cocoa ink, raspberry ─────────────── */
+:root {
+  --ground: #fff6f4;
+  --ground-2: #fdebe8;
+  --surface: #ffffff;
+  --ink: #3a1e18;
+  --ink-soft: #7c5c54;
+  --line: #f0dcd7;
+  --berry: #c93462;
+  --berry-soft: #fbd9e2;
+  --berry-ink: #ffffff;
+  --pistachio: #6f9a5a;
+  --butter: #ffe3a3;
+  --veg: #1d8a3a;
+  --egg: #b0461e;
+  --tile-mix: 100%;
+  --shadow: 58 30 24;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #1b100e;
+    --ground-2: #241512;
+    --surface: #2a1a17;
+    --ink: #fbebe5;
+    --ink-soft: #c9aba2;
+    --line: #3d2823;
+    --berry: #ff7aa0;
+    --berry-soft: #4a2230;
+    --berry-ink: #2a0d16;
+    --pistachio: #a6cf8f;
+    --butter: #5a4420;
+    --veg: #4cc26b;
+    --egg: #f08a5d;
+    --tile-mix: 26%;
+    --shadow: 0 0 0;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #1b100e;
+  --ground-2: #241512;
+  --surface: #2a1a17;
+  --ink: #fbebe5;
+  --ink-soft: #c9aba2;
+  --line: #3d2823;
+  --berry: #ff7aa0;
+  --berry-soft: #4a2230;
+  --berry-ink: #2a0d16;
+  --pistachio: #a6cf8f;
+  --butter: #5a4420;
+  --veg: #4cc26b;
+  --egg: #f08a5d;
+  --tile-mix: 26%;
+  --shadow: 0 0 0;
+}
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-ground-2: var(--ground-2);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-berry: var(--berry);
+  --color-berry-soft: var(--berry-soft);
+  --color-berry-ink: var(--berry-ink);
+  --color-pistachio: var(--pistachio);
+  --color-butter: var(--butter);
+  --color-veg: var(--veg);
+  --color-egg: var(--egg);
+
+  --font-display: "Fraunces Variable", "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Nunito Variable", "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 8rem;
+}
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Fraunces' soft, wonky cut — the cute side of a serious serif */
+.font-display {
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+::selection {
+  background: var(--berry-soft);
+  color: var(--ink);
+}
+:focus-visible {
+  outline: 2.5px solid var(--berry);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+/* tinted illustration tiles — pastel by day, glowing embers by night */
+.tile {
+  background-color: color-mix(in oklab, var(--tint) var(--tile-mix), var(--surface));
+  background-image: radial-gradient(color-mix(in oklab, var(--ink) 7%, transparent) 1.1px, transparent 1.3px);
+  background-size: 14px 14px;
+}
+
+.shadow-soft {
+  box-shadow:
+    0 1px 2px rgb(var(--shadow) / 0.05),
+    0 12px 32px -12px rgb(var(--shadow) / 0.18);
+}
+.shadow-lift {
+  box-shadow:
+    0 2px 4px rgb(var(--shadow) / 0.06),
+    0 28px 60px -20px rgb(var(--shadow) / 0.32);
+}
+
+/* dotted menu leaders */
+.leader {
+  flex: 1;
+  border-bottom: 2px dotted color-mix(in oklab, var(--ink) 28%, transparent);
+  transform: translateY(-0.3em);
+  min-width: 1rem;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translateY(-10px) rotate(var(--r, 0deg));
+  }
+}
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-7deg);
+  }
+  50% {
+    transform: rotate(-2deg);
+  }
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+.animate-sway {
+  transform-origin: 50% 0;
+  animation: sway 5s ease-in-out infinite;
+}
+.animate-marquee {
+  animation: marquee 38s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-float,
+  .animate-sway,
+  .animate-marquee {
+    animation: none;
+  }
+}
