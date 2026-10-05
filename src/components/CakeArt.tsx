@@ -844,13 +844,15 @@ function Bento({ spec, ctx }: { spec: ArtSpec; ctx: Ctx }) {
 
 /* ───────────────────────── public component ───────────────────────── */
 
-export function CakeArt({ spec, id, variant = "card", className, title }: {
+export function CakeArt({ spec, id, variant = "card", className, title, crop }: {
   spec: ArtSpec;
   id: string;
   /** keeps SVG gradient ids unique when the same cake is drawn twice on a page */
   variant?: string;
   className?: string;
   title?: string;
+  /** custom viewBox, e.g. a close-up crop of the top of the cake */
+  crop?: string;
 }) {
   const uid = `cake-${id}-${variant}`;
   const ctx: Ctx = { uid, rand: seeded(id) };
@@ -884,7 +886,7 @@ export function CakeArt({ spec, id, variant = "card", className, title }: {
       break;
   }
   return (
-    <svg viewBox="0 0 200 200" className={className} role="img" aria-label={title ?? "Cake illustration"}>
+    <svg viewBox={crop ?? "0 0 200 200"} className={className} role="img" aria-label={title ?? "Cake illustration"}>
       {body}
     </svg>
   );

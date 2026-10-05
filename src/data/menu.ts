@@ -51,704 +51,576 @@ export type ArtSpec = {
 
 export type Diet = "eggless" | "egg";
 export type Badge = "bestseller" | "new" | "seasonal" | "chef";
+export type Occasion = "birthday" | "anniversary" | "just-because";
+export type Unit = "lb" | "kg";
 
 export type SizeOption = {
   label: string;
   price: number;
   serves?: string;
+  /** weight in kg, used to price flavour and eggless upgrades */
+  kg?: number;
+};
+
+/**
+ * Cakes sold by weight: give a price per pound and the site works out every size,
+ * in pounds or kilos, depending on the toggle.
+ */
+export type WeightPricing = {
+  perLb: number;
+  /** sizes offered in pounds (default 1, 2, 3 lb) */
+  lb?: number[];
+  /** sizes offered in kilos (default ½, 1, 1½ kg) */
+  kg?: number[];
+};
+
+export type CategoryId = "floral" | "drip" | "message" | "theme" | "signature" | "bento" | "bakes";
+
+export type Kind = "Cake" | "Bento cake" | "Donut box";
+
+export type Category = {
+  id: CategoryId;
+  /** what kind of product this is, for the "what's on the menu" counts */
+  kind: Kind;
+  title: string;
+  /** short label for the filter tabs */
+  short: string;
+  cute: string;
+  note: string;
+  /**
+   * Notice needed: 0 = same day (a few hours, see site.sameDayHours),
+   * 1 = order by the night before, 2 = two days ahead…
+   */
+  leadDays: number;
+  /** can we pipe a message on it? */
+  allowMessage: boolean;
+  occasions: Occasion[];
 };
 
 export type MenuItem = {
+  /** the URL (/cakes/<id>) and the photo folder (public/cakes/<id>/) */
   id: string;
   name: string;
   real: string;
   category: CategoryId;
   blurb: string;
-  layers: string[];
+  /** "The details" chips on the cake page */
+  details: string[];
   diet: Diet;
   badges?: Badge[];
-  options: SizeOption[];
+  /** priced by weight (lb / kg toggle)… */
+  weight?: WeightPricing;
+  /** …or fixed options (bento, donuts) */
+  options?: SizeOption[];
+  /** flavour picker: true = the full list, false = none */
+  flavours?: boolean;
+  defaultFlavour?: string;
+  /** background shown while a photo loads, and behind illustrations */
   tint: string;
-  art: ArtSpec;
+  /** illustration used only if the cake has no photos yet */
+  art?: ArtSpec;
+  occasions?: Occasion[];
+  /** Optional. Photos are picked up automatically from /public/cakes/<id>/ */
+  photos?: string[];
 };
 
-export type CategoryId =
-  | "celebration"
-  | "bento"
-  | "cheesecake"
-  | "jar"
-  | "cupcake"
-  | "brownie"
-  | "teatime";
-
-export type Category = {
-  id: CategoryId;
-  title: string;
-  /** short label for the filter chips */
-  short: string;
-  cute: string;
-  note: string;
-};
+/* ───────────────────────── categories ───────────────────────── */
 
 export const categories: Category[] = [
   {
-    id: "celebration",
-    title: "Celebration Cakes",
-    short: "Celebration",
-    cute: "Party starters",
-    note: "Priced by weight. Free message piped on top.",
+    id: "floral",
+    kind: "Cake",
+    title: "Floral Cakes",
+    short: "Floral",
+    cute: "Piped by hand",
+    note: "Buttercream roses and rosettes, finished by hand.",
+    leadDays: 1,
+    allowMessage: true,
+    occasions: ["birthday", "anniversary", "just-because"],
+  },
+  {
+    id: "drip",
+    kind: "Cake",
+    title: "Drip Cakes",
+    short: "Drip",
+    cute: "Glossy & dramatic",
+    note: "Chocolate ganache drip with piped toppings.",
+    leadDays: 1,
+    allowMessage: true,
+    occasions: ["birthday", "just-because"],
+  },
+  {
+    id: "message",
+    kind: "Cake",
+    title: "Message Cakes",
+    short: "Message",
+    cute: "Say it in frosting",
+    note: "Your words piped on top. Names, numbers and inside jokes welcome.",
+    leadDays: 1,
+    allowMessage: true,
+    occasions: ["birthday", "anniversary", "just-because"],
+  },
+  {
+    id: "theme",
+    kind: "Cake",
+    title: "Kids & Theme Cakes",
+    short: "Kids & theme",
+    cute: "For the little ones",
+    note: "Doll and character cakes. They start at 2 lb. Please order 2 days ahead.",
+    leadDays: 2,
+    allowMessage: true,
+    occasions: ["birthday"],
+  },
+  {
+    id: "signature",
+    kind: "Cake",
+    title: "Signature Cakes",
+    short: "Signature",
+    cute: "Show-stoppers",
+    note: "Heart-shaped and mirror-glazed specials.",
+    leadDays: 2,
+    allowMessage: true,
+    occasions: ["anniversary", "birthday"],
   },
   {
     id: "bento",
+    kind: "Bento cake",
     title: "Bento Cakes",
     short: "Bento",
     cute: "Tiny cakes, loud feelings",
-    note: "Serves 1–2 in a lunchbox, with your own little message.",
+    note: "A 4-inch cake in a lunchbox, with your message on top.",
+    leadDays: 1,
+    allowMessage: true,
+    occasions: ["birthday", "anniversary", "just-because"],
   },
   {
-    id: "cheesecake",
-    title: "Cheesecakes",
-    short: "Cheesecakes",
-    cute: "Creamy little crushes",
-    note: "Baked, not set with gelatin. By the slice or a whole 6-inch.",
-  },
-  {
-    id: "jar",
-    title: "Jar Cakes",
-    short: "Jar cakes",
-    cute: "Spoon-first desserts",
-    note: "Layered in 250 ml glass jars. Keep chilled.",
-  },
-  {
-    id: "cupcake",
-    title: "Cupcakes",
-    short: "Cupcakes",
-    cute: "Pocket-sized joy",
-    note: "Buy one or pick a box of 4 or 6.",
-  },
-  {
-    id: "brownie",
-    title: "Brownies & Blondies",
-    short: "Brownies",
-    cute: "Fudgy best friends",
-    note: "Baked every morning, squidgy in the middle.",
-  },
-  {
-    id: "teatime",
-    title: "Tea-time Loaves",
-    short: "Loaves",
-    cute: "Chai's favourite company",
-    note: "Whole loaves (about 450 g), sliced on request.",
+    id: "bakes",
+    kind: "Donut box",
+    title: "Donuts & Bakes",
+    short: "Donuts",
+    cute: "Little treats",
+    note: "Baked fresh, best eaten the same day.",
+    leadDays: 0,
+    allowMessage: false,
+    occasions: ["just-because"],
   },
 ];
 
-const kg = (half: number, one: number, two?: number): SizeOption[] => [
-  { label: "½ kg", price: half, serves: "4–6" },
-  { label: "1 kg", price: one, serves: "8–12" },
-  ...(two ? [{ label: "2 kg", price: two, serves: "18–24" }] : []),
-];
+/* ───────────────────────── flavours ───────────────────────── */
+
+/** Sponge + cream combinations for cakes sold by weight. `extraPerLb` is added per pound. */
+export const flavours = [
+  { id: "vanilla", name: "Vanilla", extraPerLb: 0 },
+  { id: "pineapple", name: "Pineapple", extraPerLb: 0 },
+  { id: "strawberry", name: "Strawberry", extraPerLb: 0 },
+  { id: "butterscotch", name: "Butterscotch", extraPerLb: 0 },
+  { id: "chocolate", name: "Chocolate", extraPerLb: 0 },
+  { id: "black-forest", name: "Black Forest", extraPerLb: 0 },
+  { id: "chocolate-truffle", name: "Chocolate Truffle", extraPerLb: 50 },
+  { id: "red-velvet", name: "Red Velvet", extraPerLb: 50 },
+  { id: "rasmalai", name: "Rasmalai", extraPerLb: 80 },
+] as const;
+export type FlavourId = (typeof flavours)[number]["id"];
+
+
+/* ───────────────────────── the menu ───────────────────────── */
 
 export const menu: MenuItem[] = [
-  // ─── Celebration ─────────────────────────────────────────────
+  // ─── Floral ──────────────────────────────────────────────────
   {
-    id: "berry-me-in-love",
-    name: "Berry Me in Love",
-    real: "Fresh Strawberry Cream Cake",
-    category: "celebration",
-    blurb:
-      "Vanilla chiffon, whipped cream and Mahabaleshwar strawberries, piled high and dressed in pink. The cake people ask for by name.",
-    layers: ["Vanilla chiffon", "Strawberry compote", "Fresh whipped cream", "Whole strawberries"],
+    id: "rose-garden",
+    name: "Rose Garden",
+    real: "All-over Rosette Cake",
+    category: "floral",
+    blurb: "Covered edge to edge in hand-piped roses in pink, lilac and cream, with gold pearls tucked between the petals.",
+    details: ["Hand-piped roses all over", "Pink, lilac & cream", "Gold pearls", "Message on the board"],
     diet: "eggless",
     badges: ["bestseller"],
-    options: kg(549, 999, 1899),
-    tint: "#FFD9E0",
-    art: {
-      kind: "drip",
-      sponge: "#F7DDB0",
-      cream: "#FFE9EE",
-      glaze: "#F0718F",
-      accent: "#FFFFFF",
-      toppings: ["rosette", "strawberry", "rosette", "strawberry", "rosette"],
-    },
+    weight: { perLb: 399 },
+    flavours: true,
+    tint: "#F6D3DC",
   },
   {
-    id: "choco-loco-lava",
-    name: "Choco Loco Lava",
-    real: "Death by Chocolate Drip Cake",
-    category: "celebration",
-    blurb:
-      "Three layers of dark cocoa sponge, whipped ganache and a glossy Belgian drip, finished with shards and truffle pearls.",
-    layers: ["Dark cocoa sponge", "Whipped ganache", "54% Belgian drip", "Truffle pearls"],
+    id: "morning-bloom",
+    name: "Morning Bloom",
+    real: "Watercolour Rose Cake",
+    category: "floral",
+    blurb: "A soft buttery-yellow watercolour top, two big piped roses in pink and white, and a few flakes of gold leaf.",
+    details: ["Watercolour cream finish", "Two piped roses", "Gold leaf", "Combed sides"],
     diet: "eggless",
-    badges: ["bestseller"],
-    options: kg(649, 1199, 2299),
-    tint: "#EAD6CB",
-    art: {
-      kind: "drip",
-      sponge: "#5A3325",
-      cream: "#8A5A44",
-      glaze: "#3B1F17",
-      accent: "#F3D9C4",
-      toppings: ["shards", "choco-ball", "shards", "choco-ball", "gold"],
-    },
+    weight: { perLb: 349 },
+    flavours: true,
+    tint: "#F7EBC4",
   },
   {
-    id: "red-velvet-crush",
-    name: "Red Velvet Crush",
-    real: "Red Velvet & Cream Cheese",
-    category: "celebration",
-    blurb:
-      "Buttermilk cocoa sponge with a whisper of vanilla and tangy cream-cheese frosting, crumb-coated and hand-combed.",
-    layers: ["Red velvet sponge", "Cream-cheese frosting", "Velvet crumbs"],
-    diet: "egg",
-    options: kg(649, 1199, 2299),
-    tint: "#FBD3D3",
-    art: {
-      kind: "naked",
-      sponge: "#B8323F",
-      cream: "#FFF6EE",
-      accent: "#FFFFFF",
-      toppings: ["rosette", "heart", "rosette", "heart", "rosette"],
-    },
-  },
-  {
-    id: "rasmalai-royale",
-    name: "Rasmalai Royale",
-    real: "Rasmalai Fusion Two-Tier Cake",
-    category: "celebration",
-    blurb:
-      "Saffron milk-soaked sponge layered with rasmalai-studded cream, then crowned with pistachio slivers, rose petals and edible gold.",
-    layers: ["Saffron milk-soaked sponge", "Rasmalai cream", "Pistachio & rose", "Edible gold leaf"],
+    id: "blush-crescent",
+    name: "Blush Crescent",
+    real: "Pink Rosette Crescent Cake",
+    category: "floral",
+    blurb: "Clean white cream with a crescent of pink rosettes and gold pearls curving around the top. Simple and very pretty.",
+    details: ["Crescent of pink rosettes", "Gold & white pearls", "Blush brushed top"],
     diet: "eggless",
-    badges: ["chef"],
-    options: [
-      { label: "1 kg", price: 1399, serves: "8–12" },
-      { label: "2 kg", price: 2699, serves: "18–24" },
-      { label: "3 kg", price: 3899, serves: "28–35" },
-    ],
-    tint: "#FCEBC7",
-    art: {
-      kind: "tier",
-      sponge: "#F6D98E",
-      cream: "#FFF4DC",
-      glaze: "#F2C14E",
-      accent: "#E8A33D",
-      toppings: ["rose", "pistachio", "saffron", "gold", "rose"],
-    },
+    weight: { perLb: 349 },
+    flavours: true,
+    tint: "#F8DCE0",
   },
   {
-    id: "butterscotch-hugs",
-    name: "Butterscotch Hugs",
-    real: "Butterscotch Praline Cake",
-    category: "celebration",
-    blurb:
-      "Golden sponge, butterscotch cream and crunchy house-made praline, with caramel poured over the top.",
-    layers: ["Golden sponge", "Butterscotch cream", "Cashew praline", "Salted caramel"],
+    id: "sunlit-swirl",
+    name: "Sunlit Swirl",
+    real: "Pastel Swirl Cake",
+    category: "floral",
+    blurb: "A pale yellow watercolour cake topped with blue-and-white swirls, gold balls and little cream kisses.",
+    details: ["Two-tone swirl piping", "Gold balls", "Watercolour finish", "Beaded border"],
     diet: "eggless",
-    options: kg(499, 899, 1699),
-    tint: "#FFE7B8",
-    art: {
-      kind: "drip",
-      sponge: "#F2C77A",
-      cream: "#FFF1D6",
-      glaze: "#D98E2B",
-      accent: "#FFFFFF",
-      toppings: ["rosette", "caramel", "rosette", "caramel", "rosette"],
-    },
+    weight: { perLb: 349 },
+    flavours: true,
+    tint: "#F3EBC8",
   },
   {
-    id: "black-forest-fairytale",
-    name: "Black Forest Fairytale",
-    real: "Classic Black Forest",
-    category: "celebration",
-    blurb:
-      "The one from every childhood birthday, done properly: kirsch-free cherry syrup, soft chocolate sponge, clouds of cream and dark shavings.",
-    layers: ["Chocolate sponge", "Cherry syrup", "Whipped cream", "Dark shavings"],
+    id: "spring-sky",
+    name: "Spring Sky",
+    real: "Pastel Floral Crescent Cake",
+    category: "floral",
+    blurb: "A sky-blue top with a spring bouquet of yellow and peach rosettes piped along one side.",
+    details: ["Sky-blue watercolour top", "Yellow & peach rosettes", "Gold sprinkles"],
     diet: "eggless",
-    options: kg(499, 899, 1699),
-    tint: "#E9DCF0",
-    art: {
-      kind: "frosted",
-      sponge: "#4E2A20",
-      cream: "#FFF8F2",
-      glaze: "#4E2A20",
-      accent: "#FFFFFF",
-      toppings: ["cherry", "rosette", "cherry", "rosette", "cherry"],
-    },
-  },
-  {
-    id: "mango-tango",
-    name: "Mango Tango",
-    real: "Alphonso Mango Cream Cake",
-    category: "celebration",
-    blurb:
-      "Only in mango season: Ratnagiri Alphonso purée folded into cream, with fresh cubes on a vanilla sponge.",
-    layers: ["Vanilla sponge", "Alphonso mousse", "Fresh mango cubes"],
-    diet: "eggless",
-    badges: ["seasonal"],
-    options: kg(599, 1099, 2099),
-    tint: "#FFE2A8",
-    art: {
-      kind: "drip",
-      sponge: "#F8D9A0",
-      cream: "#FFF0C8",
-      glaze: "#F7A928",
-      accent: "#FFFFFF",
-      toppings: ["mango", "rosette", "mango", "rosette", "mango"],
-    },
-  },
-  {
-    id: "pineapple-pout",
-    name: "Pineapple Pout",
-    real: "Classic Pineapple Cream",
-    category: "celebration",
-    blurb:
-      "Light vanilla sponge soaked in pineapple syrup, with fresh cream and a ring of glazed pineapple and cherries. Nostalgic in the best way.",
-    layers: ["Vanilla sponge", "Pineapple syrup", "Fresh cream", "Glazed pineapple"],
-    diet: "eggless",
-    options: kg(449, 799, 1499),
-    tint: "#FFF1B0",
-    art: {
-      kind: "frosted",
-      sponge: "#F9E1A0",
-      cream: "#FFFBEA",
-      glaze: "#F6D24A",
-      accent: "#FFFFFF",
-      toppings: ["pineapple", "cherry", "pineapple", "cherry", "pineapple"],
-    },
+    weight: { perLb: 349 },
+    flavours: true,
+    tint: "#DCEAF2",
   },
 
+  // ─── Drip ────────────────────────────────────────────────────
   {
-    id: "pista-kulfi-kiss",
-    name: "Pista Kulfi Kiss",
-    real: "Pistachio Kulfi Cake",
-    category: "celebration",
-    blurb:
-      "Our take on matka kulfi: cardamom sponge, reduced-milk cream and a whole lot of pistachio, with a pale green drip and saffron threads.",
-    layers: ["Cardamom sponge", "Rabdi cream", "Pistachio drip", "Saffron threads"],
+    id: "midnight-garden",
+    name: "Midnight Garden",
+    real: "Chocolate Drip Pastel Cake",
+    category: "drip",
+    blurb: "Dark chocolate ganache dripping over pastel pink-and-blue stripes, crowned with white roses and bright little blooms.",
+    details: ["Chocolate ganache drip", "Pastel striped sides", "White roses & yellow blooms", "Gold pearls"],
+    diet: "eggless",
+    badges: ["bestseller"],
+    weight: { perLb: 499 },
+    flavours: true,
+    defaultFlavour: "chocolate",
+    tint: "#E3DCEB",
+  },
+  {
+    id: "lavender-lava",
+    name: "Lavender Lava",
+    real: "Chocolate Drip Lilac Rosette Cake",
+    category: "drip",
+    blurb: "A ring of lilac rosettes around a glossy chocolate top, with ganache drips down combed cream sides.",
+    details: ["Lilac rosette crown", "Chocolate ganache top & drip", "Pearl sprinkles"],
+    diet: "eggless",
+    weight: { perLb: 499 },
+    flavours: true,
+    defaultFlavour: "chocolate",
+    tint: "#E8DDEE",
+  },
+  {
+    id: "rosy-ganache",
+    name: "Rosy Ganache",
+    real: "Chocolate Drip Pink Rose Cake",
+    category: "drip",
+    blurb: "Pink two-tone roses and tiny flowers on a chocolate ganache top, with a pink-tipped piped border.",
+    details: ["Two-tone pink roses", "Chocolate ganache drip", "Gold pearls"],
+    diet: "eggless",
+    weight: { perLb: 499 },
+    flavours: true,
+    defaultFlavour: "chocolate",
+    tint: "#F3D6DE",
+  },
+
+  // ─── Message ─────────────────────────────────────────────────
+  {
+    id: "bows-and-pearls",
+    name: "Bows & Pearls",
+    real: "Vintage Ribbon Number Cake",
+    category: "message",
+    blurb: "Vintage-style piping in soft pink, satin bows all around and gold pearls, with a big number (or name) on top.",
+    details: ["Vintage piped borders", "Red satin bows", "Gold & white pearls", "Number or name on top"],
+    diet: "eggless",
+    badges: ["bestseller"],
+    weight: { perLb: 349 },
+    flavours: true,
+    tint: "#F6D9E0",
+  },
+  {
+    id: "love-note",
+    name: "Love Note",
+    real: "Pink Doodle Message Cake",
+    category: "message",
+    blurb: "Blush pink with a cute little doodle, piped flowers and your message across the top. Made for your person.",
+    details: ["Hand-drawn doodle", "Piped flowers", "Your message on top"],
+    diet: "eggless",
+    occasions: ["anniversary"],
+    weight: { perLb: 349 },
+    flavours: true,
+    tint: "#F8DDE2",
+  },
+  {
+    id: "golden-note",
+    name: "Golden Note",
+    real: "Minimal Gold-Rim Message Cake",
+    category: "message",
+    blurb: "Crisp white cream, a hand-painted gold rim and scattered pearls, with your message written in red. Perfect for thank-yous and farewells.",
+    details: ["Gold painted rim", "Pearl scatter", "Your message on top"],
+    diet: "eggless",
+    weight: { perLb: 349 },
+    flavours: true,
+    tint: "#F3ECE0",
+  },
+  {
+    id: "halfway-hello",
+    name: "Halfway Hello",
+    real: "Half & Half Birthday Cake",
+    category: "message",
+    blurb: "Half lemon-yellow, half lilac: “Bye 18” on one side and “Hello 19” on the other. Pick your two colours and two lines.",
+    details: ["Two colours, two halves", "Shell-piped borders", "A line on each side"],
     diet: "eggless",
     badges: ["new"],
-    options: kg(599, 1099, 2099),
-    tint: "#DDEFD2",
-    art: {
-      kind: "drip",
-      sponge: "#F3DDA6",
-      cream: "#FFF7E4",
-      glaze: "#9CC77E",
-      accent: "#FFFFFF",
-      toppings: ["pistachio", "saffron", "rosette", "macaron", "rosette"],
-    },
+    weight: { perLb: 349 },
+    flavours: true,
+    tint: "#ECE3F3",
+  },
+  {
+    id: "sweet-promise",
+    name: "Sweet Promise",
+    real: "Anniversary Sheet Cake",
+    category: "message",
+    blurb: "A rectangular cake with a soft pink marbled finish, a cluster of yellow roses and “Happy Anniversary” piped in red.",
+    details: ["Rectangular sheet cake", "Yellow piped roses", "Pink marble finish", "Message on top"],
+    diet: "eggless",
+    occasions: ["anniversary"],
+    weight: { perLb: 349, lb: [2, 3, 4], kg: [1, 1.5, 2] },
+    flavours: true,
+    tint: "#F7E2E2",
+  },
+
+  // ─── Kids & theme ────────────────────────────────────────────
+  {
+    id: "princess-twirl",
+    name: "Princess Twirl",
+    real: "Doll Gown Cake",
+    category: "theme",
+    blurb: "The doll's whole gown is cake, covered in piped pink rosettes. Every little girl's favourite birthday moment.",
+    details: ["Doll topper included", "Gown of piped rosettes", "Choose the gown colour"],
+    diet: "eggless",
+    badges: ["bestseller"],
+    weight: { perLb: 349, lb: [2, 3, 4], kg: [1, 1.5, 2] },
+    flavours: true,
+    tint: "#F8D9E1",
+  },
+  {
+    id: "little-princess",
+    name: "Little Princess",
+    real: "Doll Topper Ombré Cake",
+    category: "theme",
+    blurb: "A pink ombré cake with a little doll sitting among fresh-looking flowers on top.",
+    details: ["Doll topper included", "Pink ombré sides", "Flower arrangement"],
+    diet: "eggless",
+    weight: { perLb: 399, lb: [2, 3, 4], kg: [1, 1.5, 2] },
+    flavours: true,
+    tint: "#F5DCE6",
+  },
+  {
+    id: "little-kanha",
+    name: "Little Kanha",
+    real: "Krishna Theme Cake",
+    category: "theme",
+    blurb: "Baby Krishna toppers, a tipping matki of makhan and a peacock feather on a sky-blue cake. Made for Janmashtami and naming days.",
+    details: ["Krishna toppers", "Matki with makhan", "Peacock feather", "Name on the board"],
+    diet: "eggless",
+    badges: ["seasonal"],
+    weight: { perLb: 399, lb: [2, 3, 4], kg: [1, 1.5, 2] },
+    flavours: true,
+    tint: "#D9E8F2",
+  },
+
+  // ─── Signature ───────────────────────────────────────────────
+  {
+    id: "heartstrings",
+    name: "Heartstrings",
+    real: "Heart-shaped Floral Cake",
+    category: "signature",
+    blurb: "A heart-shaped cake in soft cream with pink and red flowers, gold pearls and a red ribbon bow. For anniversaries and big “I love you”s.",
+    details: ["Heart-shaped", "Pink & red flowers", "Ribbon bow", "Gold pearls"],
+    diet: "eggless",
+    occasions: ["anniversary"],
+    weight: { perLb: 399, lb: [2, 3, 4], kg: [1, 1.5, 2] },
+    flavours: true,
+    tint: "#F6E6D3",
+  },
+  {
+    id: "sunset-mirror",
+    name: "Sunset Mirror",
+    real: "Mirror Glaze Cake",
+    category: "signature",
+    blurb: "A glass-smooth mirror glaze marbled in raspberry pink, mango yellow and white. It shines like a sunset.",
+    details: ["Mirror glaze", "Marbled pink & yellow", "Smooth mousse finish"],
+    diet: "eggless",
+    badges: ["new"],
+    weight: { perLb: 549 },
+    flavours: true,
+    tint: "#F8D6DD",
   },
 
   // ─── Bento ───────────────────────────────────────────────────
   {
-    id: "bento-bae",
-    name: "Bento Bae",
-    real: "Vanilla Bento with Message",
+    id: "pastel-dream-bento",
+    name: "Pastel Dream",
+    real: "Marble Bento Cake",
     category: "bento",
-    blurb:
-      "A 4-inch vanilla cake in a kraft lunchbox with a tiny wooden spoon. Tell us the message (up to 12 letters) and we'll pipe it.",
-    layers: ["Vanilla sponge", "Vanilla bean cream", "Your message"],
+    blurb: "A lilac-and-blue marbled bento in a lunchbox, with your message piped in purple and a scatter of pearls.",
+    details: ["4-inch cake", "Lilac & blue marble", "Lunchbox + wooden spoon"],
     diet: "eggless",
     badges: ["new"],
-    options: [{ label: "250 g", price: 449, serves: "1–2" }],
-    tint: "#DDEFE7",
-    art: {
-      kind: "bento",
-      sponge: "#F7DDB0",
-      cream: "#CDEBDD",
-      accent: "#E47A9A",
-      message: "love u",
-      toppings: ["heart"],
-    },
+    options: [{ label: "Bento · 4″", price: 199, serves: "1–2", kg: 0.25 }],
+    flavours: true,
+    tint: "#E6E0F3",
   },
   {
-    id: "tiny-tantrum",
-    name: "Tiny Tantrum",
-    real: "Chocolate Truffle Bento",
+    id: "cloud-nine-bento",
+    name: "Cloud Nine",
+    real: "Doodle Bento Cake",
     category: "bento",
-    blurb:
-      "Dense chocolate truffle in lunchbox size, for sorry, for birthdays, or for a Tuesday that needs it.",
-    layers: ["Cocoa sponge", "Chocolate truffle", "Cocoa nib crunch"],
+    blurb: "White cream, a happy little party-hat cloud doodle and your message in blue. Small cake, big smile.",
+    details: ["4-inch cake", "Hand-drawn doodle", "Lunchbox + wooden spoon"],
     diet: "eggless",
-    options: [{ label: "250 g", price: 479, serves: "1–2" }],
-    tint: "#EFDFD3",
-    art: {
-      kind: "bento",
-      sponge: "#5A3325",
-      cream: "#6B3E2E",
-      accent: "#FFE9EE",
-      message: "sorry!",
-      toppings: ["heart"],
-    },
-  },
-  {
-    id: "lil-sunshine",
-    name: "Lil’ Sunshine",
-    real: "Lemon Bento with Lemon Curd",
-    category: "bento",
-    blurb: "Zesty lemon sponge and a hidden centre of silky lemon curd, in butter-yellow buttercream.",
-    layers: ["Lemon sponge", "Lemon curd centre", "Butter-yellow cream"],
-    diet: "egg",
-    options: [{ label: "250 g", price: 469, serves: "1–2" }],
-    tint: "#FFF3BF",
-    art: {
-      kind: "bento",
-      sponge: "#FBE7A3",
-      cream: "#FFE98A",
-      accent: "#6E9A57",
-      message: "yay you",
-      toppings: ["heart"],
-    },
+    options: [{ label: "Bento · 4″", price: 199, serves: "1–2", kg: 0.25 }],
+    flavours: true,
+    tint: "#DCEAF5",
   },
 
-  // ─── Cheesecakes ─────────────────────────────────────────────
+  // ─── Bakes ───────────────────────────────────────────────────
   {
-    id: "blue-moon-kisses",
-    name: "Blue Moon Kisses",
-    real: "Baked Blueberry Cheesecake",
-    category: "cheesecake",
-    blurb:
-      "New York-style baked cheesecake on a buttery biscuit crust, with blueberry compote swirled on top.",
-    layers: ["Butter-biscuit crust", "Baked cream cheese", "Blueberry compote"],
-    diet: "egg",
-    badges: ["bestseller"],
-    options: [
-      { label: "Slice", price: 229, serves: "1" },
-      { label: "Whole 6″", price: 1249, serves: "6–8" },
-    ],
-    tint: "#DCE0F7",
-    art: {
-      kind: "slice",
-      sponge: "#C98F55",
-      cream: "#FFF3DC",
-      glaze: "#4B3B8F",
-      toppings: ["blueberry"],
-    },
-  },
-  {
-    id: "new-york-nap",
-    name: "New York Nap",
-    real: "Classic Vanilla Bean Cheesecake",
-    category: "cheesecake",
-    blurb:
-      "Tall and creamy with a caramelised top, lifted by vanilla bean and lemon zest. Simple, and our quiet favourite.",
-    layers: ["Graham-style crust", "Vanilla bean cheesecake", "Caramelised top"],
-    diet: "egg",
-    options: [
-      { label: "Slice", price: 209, serves: "1" },
-      { label: "Whole 6″", price: 1149, serves: "6–8" },
-    ],
-    tint: "#FFF0D6",
-    art: {
-      kind: "slice",
-      sponge: "#C98F55",
-      cream: "#FFF4DE",
-      glaze: "#E0A45A",
-      toppings: ["strawberry"],
-    },
-  },
-  {
-    id: "hazel-hug",
-    name: "Hazel Hug",
-    real: "Hazelnut Chocolate Cheesecake",
-    category: "cheesecake",
-    blurb:
-      "Chocolate-hazelnut cheesecake on a cocoa crumb base with a layer of gianduja and roasted hazelnuts on top.",
-    layers: ["Cocoa crumb base", "Hazelnut cheesecake", "Gianduja layer", "Roasted hazelnuts"],
-    diet: "eggless",
-    badges: ["new"],
-    options: [
-      { label: "Slice", price: 249, serves: "1" },
-      { label: "Whole 6″", price: 1349, serves: "6–8" },
-    ],
-    tint: "#EADBCF",
-    art: {
-      kind: "slice",
-      sponge: "#4A2B20",
-      cream: "#C79A78",
-      glaze: "#5A3325",
-      toppings: ["walnut"],
-    },
-  },
-
-  // ─── Jar cakes ───────────────────────────────────────────────
-  {
-    id: "tiramisu-tuck-in",
-    name: "Tiramisu Tuck-in",
-    real: "Coffee Tiramisu Jar",
-    category: "jar",
-    blurb:
-      "Espresso-soaked sponge, mascarpone cream and a thick dusting of cocoa, in a jar you'll want to keep.",
-    layers: ["Espresso-soaked sponge", "Mascarpone cream", "Cocoa dust"],
-    diet: "eggless",
-    badges: ["bestseller"],
-    options: [
-      { label: "1 jar", price: 189 },
-      { label: "Box of 4", price: 699 },
-    ],
-    tint: "#EFE0CF",
-    art: {
-      kind: "jar",
-      sponge: "#A0673F",
-      cream: "#FFF3E0",
-      glaze: "#5A3325",
-      toppings: ["choco-ball"],
-    },
-  },
-  {
-    id: "cookies-cream-dream",
-    name: "Cookies & Cream Dream",
-    real: "Cookies & Cream Jar",
-    category: "jar",
-    blurb: "Chocolate cookie crumble, vanilla cream and cocoa sponge, all the way to the bottom of the jar.",
-    layers: ["Cocoa sponge", "Cookie crumble", "Vanilla cream"],
+    id: "sprinkle-party-donuts",
+    name: "Sprinkle Party",
+    real: "Glazed Donuts",
+    category: "bakes",
+    blurb: "Soft baked donuts dipped in white chocolate, drizzled in pink and showered with rainbow sprinkles.",
+    details: ["White chocolate glaze", "Pink drizzle", "Rainbow sprinkles"],
     diet: "eggless",
     options: [
-      { label: "1 jar", price: 169 },
-      { label: "Box of 4", price: 629 },
+      { label: "Box of 3", price: 99 },
+      { label: "Box of 6", price: 149 },
     ],
-    tint: "#E3E3EA",
-    art: {
-      kind: "jar",
-      sponge: "#3A2622",
-      cream: "#FFFFFF",
-      glaze: "#3A2622",
-      toppings: ["cookie"],
-    },
-  },
-  {
-    id: "rasmalai-rendezvous",
-    name: "Rasmalai Rendezvous",
-    real: "Rasmalai Jar",
-    category: "jar",
-    blurb: "Saffron-milk sponge, mini rasmalai, pistachio cream and rose petals. A festive sweet, served by the spoon.",
-    layers: ["Saffron-milk sponge", "Mini rasmalai", "Pistachio cream", "Rose petals"],
-    diet: "eggless",
-    badges: ["chef"],
-    options: [
-      { label: "1 jar", price: 199 },
-      { label: "Box of 4", price: 749 },
-    ],
-    tint: "#FDEBC8",
-    art: {
-      kind: "jar",
-      sponge: "#F2CC7A",
-      cream: "#FFF6DD",
-      glaze: "#E7B04A",
-      toppings: ["pistachio"],
-    },
-  },
-
-  // ─── Cupcakes ────────────────────────────────────────────────
-  {
-    id: "vanilla-cloud-nine",
-    name: "Vanilla Cloud Nine",
-    real: "Vanilla Bean Cupcake",
-    category: "cupcake",
-    blurb: "Madagascar vanilla sponge with a tall swirl of whipped buttercream and rainbow sprinkles.",
-    layers: ["Vanilla bean sponge", "Whipped buttercream", "Rainbow sprinkles"],
-    diet: "eggless",
-    options: [
-      { label: "Single", price: 79 },
-      { label: "Box of 4", price: 289 },
-      { label: "Box of 6", price: 419 },
-    ],
-    tint: "#E6E0FA",
-    art: {
-      kind: "cupcake",
-      sponge: "#F5D79E",
-      cream: "#FFF6FB",
-      accent: "#B9A6EE",
-      toppings: ["sprinkles"],
-    },
-  },
-  {
-    id: "choco-chip-chirpy",
-    name: "Choco Chip Chirpy",
-    real: "Double Chocolate Cupcake",
-    category: "cupcake",
-    blurb: "Chocolate sponge with a molten ganache centre, topped with a cocoa swirl and a cherry.",
-    layers: ["Chocolate sponge", "Molten ganache centre", "Cocoa frosting"],
-    diet: "eggless",
-    badges: ["bestseller"],
-    options: [
-      { label: "Single", price: 89 },
-      { label: "Box of 4", price: 329 },
-      { label: "Box of 6", price: 479 },
-    ],
-    tint: "#EFD9CC",
-    art: {
-      kind: "cupcake",
-      sponge: "#5A3325",
-      cream: "#8A5A44",
-      accent: "#F1A7B7",
-      toppings: ["cherry"],
-    },
-  },
-  {
-    id: "rose-pistachio-poem",
-    name: "Rose Pistachio Poem",
-    real: "Rose & Pistachio Cupcake",
-    category: "cupcake",
-    blurb: "Cardamom sponge, rose-water buttercream and chopped pistachio. Tastes a little like a wedding.",
-    layers: ["Cardamom sponge", "Rose buttercream", "Pistachio"],
-    diet: "eggless",
-    badges: ["new"],
-    options: [
-      { label: "Single", price: 99 },
-      { label: "Box of 4", price: 369 },
-      { label: "Box of 6", price: 539 },
-    ],
-    tint: "#FADCE4",
-    art: {
-      kind: "cupcake",
-      sponge: "#F2D39A",
-      cream: "#F8BFCF",
-      accent: "#A8C98F",
-      toppings: ["pistachio", "rose"],
-    },
-  },
-
-  // ─── Brownies ────────────────────────────────────────────────
-  {
-    id: "fudge-grudge",
-    name: "Fudge Grudge",
-    real: "Classic Walnut Brownie",
-    category: "brownie",
-    blurb: "Crackly top, dense fudgy middle, toasted walnuts. It'll take care of any grudge.",
-    layers: ["70% dark chocolate", "Brown butter", "Toasted walnuts"],
-    diet: "egg",
-    badges: ["bestseller"],
-    options: [
-      { label: "1 piece", price: 109 },
-      { label: "Box of 6", price: 599 },
-    ],
-    tint: "#E9D8CC",
-    art: {
-      kind: "brownie",
-      sponge: "#4A2A1E",
-      cream: "#6B3E2E",
-      toppings: ["walnut"],
-    },
-  },
-  {
-    id: "blondie-bestie",
-    name: "Blondie Bestie",
-    real: "White Chocolate Blondie",
-    category: "brownie",
-    blurb: "Brown-sugar blondie studded with white chocolate and salted caramel.",
-    layers: ["Brown-sugar batter", "White chocolate", "Salted caramel"],
-    diet: "egg",
-    options: [
-      { label: "1 piece", price: 119 },
-      { label: "Box of 6", price: 649 },
-    ],
-    tint: "#FBE8C4",
-    art: {
-      kind: "brownie",
-      sponge: "#D9A45C",
-      cream: "#E9BC77",
-      toppings: ["caramel"],
-    },
-  },
-  {
-    id: "nutty-buddy",
-    name: "Nutty Buddy",
-    real: "Eggless Nutella-style Brownie",
-    category: "brownie",
-    blurb: "Our eggless brownie with a hazelnut-cocoa swirl baked through the top. Gooey, rich and fully veg.",
-    layers: ["Eggless cocoa batter", "Hazelnut-cocoa swirl", "Sea salt"],
-    diet: "eggless",
-    options: [
-      { label: "1 piece", price: 119 },
-      { label: "Box of 6", price: 649 },
-    ],
-    tint: "#EADFD6",
-    art: {
-      kind: "brownie",
-      sponge: "#5A3325",
-      cream: "#7B4A36",
-      toppings: ["shards"],
-    },
-  },
-
-  // ─── Tea-time ────────────────────────────────────────────────
-  {
-    id: "banana-bread-buddy",
-    name: "Banana Bread Buddy",
-    real: "Walnut Banana Bread",
-    category: "teatime",
-    blurb: "Made with very ripe bananas, brown sugar and walnuts, and a split top that turns caramel-crisp.",
-    layers: ["Ripe banana", "Brown sugar", "Walnuts"],
-    diet: "eggless",
-    options: [{ label: "Loaf", price: 379 }],
-    tint: "#F7E6C8",
-    art: {
-      kind: "loaf",
-      sponge: "#C58A4E",
-      cream: "#E8BD82",
-      glaze: "#8C5A2E",
-      toppings: ["walnut"],
-    },
-  },
-  {
-    id: "marble-mood",
-    name: "Marble Mood",
-    real: "Chocolate Vanilla Marble Loaf",
-    category: "teatime",
-    blurb: "Chocolate and vanilla batters swirled together into one soft, buttery loaf. Made for chai.",
-    layers: ["Vanilla batter", "Cocoa batter", "Butter crumb"],
-    diet: "eggless",
-    options: [{ label: "Loaf", price: 329 }],
-    tint: "#F3E4D6",
-    art: {
-      kind: "loaf",
-      sponge: "#F2D29A",
-      cream: "#F6DDA9",
-      glaze: "#B0773F",
-      swirl: "#6B3E2E",
-    },
-  },
-  {
-    id: "lemon-drizzle-dazzle",
-    name: "Lemon Drizzle Dazzle",
-    real: "Lemon Drizzle Loaf",
-    category: "teatime",
-    blurb: "Lemon-zest sponge, soaked while still warm and finished with a crackly sugar glaze.",
-    layers: ["Lemon sponge", "Lemon syrup soak", "Sugar glaze"],
-    diet: "egg",
-    badges: ["new"],
-    options: [{ label: "Loaf", price: 349 }],
-    tint: "#FFF4C2",
-    art: {
-      kind: "loaf",
-      sponge: "#F8E08E",
-      cream: "#FCEBB0",
-      glaze: "#FFFDF4",
-      toppings: ["lemon"],
-    },
+    flavours: false,
+    tint: "#F6E3EA",
   },
 ];
 
-export const addOns = [
-  { name: "Message on cake", detail: "Up to 25 characters, piped by hand", price: 0 },
-  { name: "Sparkle candles", detail: "Pack of 10, gold", price: 49 },
-  { name: "Number candle", detail: "Any digit, gold or pink", price: 59 },
-  { name: "Photo print top", detail: "Edible photo sheet, ½ kg and up", price: 249 },
-  { name: "Fondant topper", detail: "Name or number, hand-cut", price: 349 },
-  { name: "Make it eggless", detail: "Anything marked with egg", price: 50, suffix: "/ kg" },
-] as const;
+/* ───────────────────────── extras ───────────────────────── */
+
+/** Little extras the customer can tick in their box */
+export type Extra = { id: string; name: string; detail: string; price: number; ask?: string };
+export const extras: Extra[] = [
+  { id: "candles", name: "Sparkle candles", detail: "Pack of 10, gold", price: 39 },
+  { id: "number-candle", name: "Number candle", detail: "Gold, any digit", price: 49, ask: "Which number?" },
+  { id: "knife", name: "Cake knife & plates", detail: "Knife, 6 paper plates", price: 29 },
+];
+
+/* ───────────────────────── helpers ───────────────────────── */
 
 export function formatINR(value: number) {
   if (value === 0) return "Free";
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(value);
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
 }
 
-export function fromPrice(item: MenuItem) {
-  return Math.min(...item.options.map((o) => o.price));
+const LB_IN_KG = 0.45359;
+/** round to a friendly price ending in 9 */
+const nice = (x: number) => (x < 100 ? Math.round(x) : Math.round(x / 10) * 10 - 1);
+const kgLabel = (k: number) => (k === 0.5 ? "½ kg" : k === 1.5 ? "1½ kg" : `${k} kg`);
+const servesFor = (lb: number) => `${Math.round(lb * 4)}–${Math.round(lb * 5)}`;
+
+/** The sizes on offer for a cake, in pounds or kilos. */
+export function optionsFor(item: MenuItem, unit: Unit): SizeOption[] {
+  if (!item.weight) return item.options ?? [];
+  const { perLb } = item.weight;
+  if (unit === "kg") {
+    return (item.weight.kg ?? [0.5, 1, 1.5]).map((k) => {
+      const lb = k / LB_IN_KG;
+      return { label: kgLabel(k), price: nice(perLb * lb), serves: servesFor(lb), kg: k };
+    });
+  }
+  return (item.weight.lb ?? [1, 2, 3]).map((lb) => ({
+    label: `${lb} lb`,
+    price: lb === 1 ? perLb : nice(perLb * lb),
+    serves: servesFor(lb),
+    kg: lb * LB_IN_KG,
+  }));
+}
+
+export const isByWeight = (item: MenuItem) => Boolean(item.weight);
+
+/** Price per pound or per kilo for cakes sold by weight (what the cards show). */
+export function ratePer(item: MenuItem, unit: Unit) {
+  if (!item.weight) return fromPrice(item, unit);
+  return unit === "lb" ? item.weight.perLb : nice(item.weight.perLb / LB_IN_KG);
+}
+
+export function fromPrice(item: MenuItem, unit: Unit = "lb") {
+  return Math.min(...optionsFor(item, unit).map((o) => o.price));
+}
+
+export const getItem = (id: string) => menu.find((m) => m.id === id);
+export const getCategory = (id: CategoryId) => categories.find((c) => c.id === id)!;
+export const getFlavour = (id?: string) => flavours.find((f) => f.id === id);
+
+export function occasionsOf(item: MenuItem): Occasion[] {
+  return Array.from(new Set([...getCategory(item.category).occasions, ...(item.occasions ?? [])]));
+}
+
+export const occasionLabels: Record<Occasion, string> = {
+  birthday: "Birthday",
+  anniversary: "Anniversary",
+  "just-because": "Just because",
+};
+
+/** Eggless upgrade for items made with egg: ₹ per kg, or a flat amount for small bakes. */
+export const EGGLESS_PER_KG = 50;
+export const EGGLESS_FLAT = 20;
+export function egglessExtra(item: MenuItem, option: SizeOption) {
+  if (item.diet === "eggless") return 0;
+  return option.kg ? Math.round(EGGLESS_PER_KG * Math.max(option.kg, 0.5)) : EGGLESS_FLAT;
+}
+
+/** Premium flavour surcharge for one cake of this size. */
+export function flavourExtra(option: SizeOption, flavourId?: string) {
+  const f = getFlavour(flavourId);
+  if (!f || !f.extraPerLb || !option.kg) return 0;
+  return Math.round((f.extraPerLb * option.kg) / LB_IN_KG / 10) * 10;
+}
+
+export type PriceOpts = { eggless?: boolean; flavour?: string };
+
+/** Price of one cake before any offer. */
+export function unitPrice(item: MenuItem, unit: Unit, sizeIndex: number, opts: PriceOpts = {}) {
+  const options = optionsFor(item, unit);
+  const option = options[sizeIndex] ?? options[0];
+  return (
+    option.price +
+    (opts.eggless ? egglessExtra(item, option) : 0) +
+    (item.flavours ? flavourExtra(option, opts.flavour) : 0)
+  );
+}
+
+/** Notice (in days) for a cake. */
+export function leadDaysFor(item: MenuItem) {
+  return getCategory(item.category).leadDays;
+}
+
+/** What's on the menu, for the counts shown on the site. */
+export function menuStats() {
+  const byKind = new Map<Kind, number>();
+  for (const m of menu) {
+    const k = getCategory(m.category).kind;
+    byKind.set(k, (byKind.get(k) ?? 0) + 1);
+  }
+  return {
+    total: menu.length,
+    categories: categories.filter((c) => menu.some((m) => m.category === c.id)).length,
+    flavours: flavours.length,
+    byKind: [...byKind.entries()].map(([kind, count]) => ({ kind, count, label: `${count} ${kind.toLowerCase()}${count === 1 ? "" : "s"}` })),
+  };
 }

@@ -1,86 +1,73 @@
 @import "tailwindcss";
 
-/* ── Palette: strawberry milk, cocoa ink, raspberry ─────────────── */
+/* ── Palette: ivory, blush watercolour, rosewood ink ───────────────── */
 :root {
-  --ground: #fff6f4;
-  --ground-2: #fdebe8;
-  --surface: #ffffff;
-  --ink: #3a1e18;
-  --ink-soft: #7c5c54;
-  --line: #f0dcd7;
-  --berry: #c93462;
-  --berry-soft: #fbd9e2;
-  --berry-ink: #ffffff;
-  --pistachio: #6f9a5a;
-  --butter: #ffe3a3;
-  --veg: #1d8a3a;
-  --egg: #b0461e;
-  --tile-mix: 100%;
-  --shadow: 58 30 24;
+  --ground: #fbf7f3;
+  --paper: #ffffff;
+  --blush: #f5e8e3;
+  --blush-2: #efd9d1;
+  --ink: #2a1c19;
+  --muted: #776560;
+  --line: #ebe0da;
+  --accent: #9e3b52;
+  --accent-hover: #88304a;
+  --accent-ink: #ffffff;
+  --accent-soft: #f7e4e8;
+  --veg: #2e7d32;
+  --egg: #a4471f;
+  --gold: #b0844a;
+  --tile-mix: 48%;
+  --wash-o: 1;
+  --shadow: 70 35 30;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --ground: #1b100e;
-    --ground-2: #241512;
-    --surface: #2a1a17;
-    --ink: #fbebe5;
-    --ink-soft: #c9aba2;
-    --line: #3d2823;
-    --berry: #ff7aa0;
-    --berry-soft: #4a2230;
-    --berry-ink: #2a0d16;
-    --pistachio: #a6cf8f;
-    --butter: #5a4420;
-    --veg: #4cc26b;
-    --egg: #f08a5d;
-    --tile-mix: 26%;
-    --shadow: 0 0 0;
-  }
-}
+/* Light is the default. Dark mode is opt-in from the header button (stored on the device). */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --ground: #1b100e;
-  --ground-2: #241512;
-  --surface: #2a1a17;
-  --ink: #fbebe5;
-  --ink-soft: #c9aba2;
-  --line: #3d2823;
-  --berry: #ff7aa0;
-  --berry-soft: #4a2230;
-  --berry-ink: #2a0d16;
-  --pistachio: #a6cf8f;
-  --butter: #5a4420;
-  --veg: #4cc26b;
-  --egg: #f08a5d;
-  --tile-mix: 26%;
+  --ground: #15100f;
+  --paper: #1e1715;
+  --blush: #271d1a;
+  --blush-2: #32251f;
+  --ink: #f4ebe6;
+  --muted: #b5a39c;
+  --line: #362a26;
+  --accent: #e8899f;
+  --accent-hover: #f09cb0;
+  --accent-ink: #2a0f17;
+  --accent-soft: #3a2228;
+  --veg: #5cbf6a;
+  --egg: #ee8a5c;
+  --gold: #d6aa6a;
+  --tile-mix: 20%;
+  --wash-o: 0.28;
   --shadow: 0 0 0;
 }
 
 @theme inline {
   --color-ground: var(--ground);
-  --color-ground-2: var(--ground-2);
-  --color-surface: var(--surface);
+  --color-paper: var(--paper);
+  --color-blush: var(--blush);
+  --color-blush-2: var(--blush-2);
   --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
   --color-line: var(--line);
-  --color-berry: var(--berry);
-  --color-berry-soft: var(--berry-soft);
-  --color-berry-ink: var(--berry-ink);
-  --color-pistachio: var(--pistachio);
-  --color-butter: var(--butter);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
   --color-veg: var(--veg);
   --color-egg: var(--egg);
+  --color-gold: var(--gold);
 
-  --font-display: "Fraunces Variable", "Fraunces", ui-serif, Georgia, serif;
-  --font-sans: "Nunito Variable", "Nunito", ui-rounded, system-ui, sans-serif;
-  --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --font-display: "Playfair Display Variable", "Playfair Display", ui-serif, Georgia, serif;
+  --font-sans: "Figtree Variable", "Figtree", ui-sans-serif, system-ui, sans-serif;
+
+  --ease-soft: cubic-bezier(0.22, 0.8, 0.24, 1);
 }
 
 html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 8rem;
+  scroll-padding-top: 6rem;
+  -webkit-tap-highlight-color: transparent;
 }
 body {
   background: var(--ground);
@@ -89,50 +76,52 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
-
-/* Fraunces' soft, wonky cut — the cute side of a serious serif */
-.font-display {
-  font-variation-settings: "SOFT" 100, "WONK" 1;
+/* logo: show the version that suits the theme */
+.logo-dark {
+  display: none;
+}
+:root[data-theme="dark"] .logo-light {
+  display: none;
+}
+:root[data-theme="dark"] .logo-dark {
+  display: block;
+}
+/* fieldsets default to min-width: min-content, which lets scrolling rows widen the page */
+fieldset {
+  min-width: 0;
 }
 h1,
 h2,
 h3 {
   text-wrap: balance;
 }
+p {
+  text-wrap: pretty;
+}
 ::selection {
-  background: var(--berry-soft);
+  background: var(--accent-soft);
   color: var(--ink);
 }
 :focus-visible {
-  outline: 2.5px solid var(--berry);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
-  border-radius: 10px;
 }
 
-/* tinted illustration tiles — pastel by day, glowing embers by night */
+/* softened item tint behind illustrations */
 .tile {
-  background-color: color-mix(in oklab, var(--tint) var(--tile-mix), var(--surface));
-  background-image: radial-gradient(color-mix(in oklab, var(--ink) 7%, transparent) 1.1px, transparent 1.3px);
-  background-size: 14px 14px;
+  background:
+    radial-gradient(120% 90% at 50% 35%, color-mix(in oklab, var(--tint) calc(var(--tile-mix) + 10%), var(--paper)), color-mix(in oklab, var(--tint) var(--tile-mix), var(--blush)));
 }
 
 .shadow-soft {
   box-shadow:
-    0 1px 2px rgb(var(--shadow) / 0.05),
-    0 12px 32px -12px rgb(var(--shadow) / 0.18);
+    0 1px 2px rgb(var(--shadow) / 0.04),
+    0 10px 30px -14px rgb(var(--shadow) / 0.18);
 }
 .shadow-lift {
   box-shadow:
-    0 2px 4px rgb(var(--shadow) / 0.06),
-    0 28px 60px -20px rgb(var(--shadow) / 0.32);
-}
-
-/* dotted menu leaders */
-.leader {
-  flex: 1;
-  border-bottom: 2px dotted color-mix(in oklab, var(--ink) 28%, transparent);
-  transform: translateY(-0.3em);
-  min-width: 1rem;
+    0 2px 6px rgb(var(--shadow) / 0.06),
+    0 30px 60px -24px rgb(var(--shadow) / 0.3);
 }
 
 .no-scrollbar {
@@ -142,47 +131,48 @@ h3 {
   display: none;
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0) rotate(var(--r, 0deg));
-  }
-  50% {
-    transform: translateY(-10px) rotate(var(--r, 0deg));
-  }
+.wash {
+  opacity: var(--wash-o);
 }
-@keyframes sway {
-  0%,
-  100% {
-    transform: rotate(-7deg);
-  }
-  50% {
-    transform: rotate(-2deg);
-  }
+
+/* hairline with a soft fade at both ends */
+.rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line) 12%, var(--line) 88%, transparent);
 }
-@keyframes marquee {
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
   to {
-    transform: translateX(-50%);
+    opacity: 1;
+    transform: none;
   }
 }
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+@keyframes bump {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+  }
 }
-.animate-sway {
-  transform-origin: 50% 0;
-  animation: sway 5s ease-in-out infinite;
+.animate-rise {
+  animation: rise 0.7s var(--ease-soft) both;
 }
-.animate-marquee {
-  animation: marquee 38s linear infinite;
+.animate-bump {
+  animation: bump 0.45s var(--ease-soft);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  .animate-float,
-  .animate-sway,
-  .animate-marquee {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
